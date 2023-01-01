@@ -27,7 +27,7 @@ jobs:
       - name: Install and Build 🔧
         run: |
           npm ci
-          npm run build --base=/thing/
+          npm run build
       - name: Setup Pages 📕
         uses: actions/configure-pages@v2
       - name: Upload artifact 💌

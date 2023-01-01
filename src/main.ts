@@ -19,6 +19,6 @@ const u = qr.toDataURL();
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
     <h1>Thing</h1>
-    <img src=${u} />
+    <img src=${u} alt="QR Code for ${base}"/>
   </div>
 `;

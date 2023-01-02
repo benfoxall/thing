@@ -1,13 +1,12 @@
 import "./style.css";
 import QRious from "qrious";
+import { Session } from "./Session";
 
-const sessionID = crypto.randomUUID();
-
-console.log(sessionID);
+const session = new Session();
 
 const { origin, pathname } = window.location;
 const base = `${origin}${pathname}${new URLSearchParams({
-  session: sessionID,
+  session: session.id,
 })}`;
 
 var qr = new QRious({
@@ -19,6 +18,7 @@ const u = qr.toDataURL();
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
     <h1>Thing</h1>
+    <p>${session.id}</p>
     <img class="qr" src=${u} alt="QR Code for ${base}"/>
   </div>
 `;

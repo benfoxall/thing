@@ -5,8 +5,8 @@ import { Session } from "./Session";
 const session = new Session();
 
 const { origin, pathname } = window.location;
-const base = `${origin}${pathname}${new URLSearchParams({
-  session: session.id,
+const base = `${origin}${pathname}?${new URLSearchParams({
+  claim: session.id,
 })}`;
 
 var qr = new QRious({
@@ -17,8 +17,9 @@ const u = qr.toDataURL();
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
-    <h1>Thing</h1>
     <p>${session.id}</p>
-    <img class="qr" src=${u} alt="QR Code for ${base}"/>
+    <a href="${base}" target="_blank">
+      <img class="qr" src=${u} alt="QR Code for ${base}"/>
+    </a>
   </div>
 `;

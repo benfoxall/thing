@@ -13,6 +13,7 @@
     "vite": "^4.0.0"
   },
   "dependencies": {
+    "js-aruco": "github:benfoxall/js-aruco",
     "qrious": "^4.0.2"
   }
 }

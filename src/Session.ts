@@ -1,3 +1,4 @@
+import { PeerClient, PeerServer } from "./signal/peerClient";
 import { SignalClient } from "./signal/signal";
 
 export class Session {
@@ -20,4 +21,10 @@ function getId() {
 
 // @ts-ignore
 window.SignalClient = SignalClient;
+
+// @ts-ignore
+window.PeerClient = PeerClient;
+
+// @ts-ignore
+window.PeerServer = PeerServer;
 // const s = new SignalClient('thing-thing')

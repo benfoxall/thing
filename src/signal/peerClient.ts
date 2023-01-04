@@ -1,8 +1,12 @@
 // import signalhub from 'signalhub'
 import Peer from "simple-peer";
 import { SignalClient } from "./signal";
-// import { Dispatch } from "redux";
 
+import global from "global";
+import * as process from "process";
+global.process = process;
+
+type Dispatch = (id: string, payload: Uint8Array) => void;
 type Listener = (id: string, payload: Uint8Array) => void;
 
 export enum Events {
@@ -32,8 +36,8 @@ export class PeerServer {
 
     const client = new SignalClient(room, dispatch);
 
-    let peerConfig;
-    client.twillio.then((c) => (peerConfig = c));
+    let peerConfig: any;
+    client.twillio.promise.then((c) => (peerConfig = c));
 
     client.on("data", (message, remoteId) => {
       // if we haven't see this connection before
@@ -92,7 +96,7 @@ export class PeerServer {
         this.peers.set(remoteId, peer);
       }
 
-      this.peers.get(remoteId).signal(JSON.stringify(message));
+      this.peers.get(remoteId)?.signal(JSON.stringify(message));
     });
   }
 
@@ -104,16 +108,13 @@ export class PeerServer {
 
   send(id: string, payload: Uint8Array) {
     if (this.peers.has(id)) {
-      this.peers.get(id).send(payload);
+      this.peers.get(id)?.send(payload);
     }
   }
 
   private notify(type: Events, payload?: any) {
     if (this.dispatch) {
-      this.dispatch({
-        type,
-        payload,
-      });
+      this.dispatch(type, payload);
     } else {
       console.log(type, payload);
     }
@@ -140,7 +141,7 @@ export class PeerClient {
         await new Promise((r) => setTimeout(r, 700));
       }
 
-      const config = await client.twillio;
+      const config = await client.twillio.promise;
 
       const peer = new Peer({ initiator: true, config });
 
@@ -214,10 +215,7 @@ export class PeerClient {
 
   private notify(type: Events, payload?: any) {
     if (this.dispatch) {
-      this.dispatch({
-        type,
-        payload,
-      });
+      this.dispatch(type, payload);
     } else {
       console.log(type, payload);
     }

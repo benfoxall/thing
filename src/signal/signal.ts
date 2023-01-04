@@ -28,7 +28,7 @@ type Dispatch = (event: Event, payload?: any) => void;
 
 export class SignalClient {
   public error: string | null = null;
-  public twillio = defer();
+  public twillio = defer<RTCConfiguration>();
   public auth = defer<string>();
 
   private ws: WebSocket;

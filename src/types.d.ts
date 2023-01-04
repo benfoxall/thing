@@ -21,3 +21,8 @@ declare module "qrious" {
 }
 
 declare var QRious: QRiousStatic;
+
+declare module "global";
+{
+  export = any;
+}

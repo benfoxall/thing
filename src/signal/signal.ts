@@ -1,5 +1,4 @@
 import WebSocket from "./reconnecting-ws";
-import { Action, AnyAction, Dispatch } from "redux";
 
 const BACKEND = "wss://i0eiyzqlwl.execute-api.eu-west-1.amazonaws.com/dev";
 const TOKEN_KEY_PREFIX = "{{tok=>";
@@ -13,7 +12,7 @@ const log = (...message: any[]) => {
   console.log.apply(console, ["%c[ws]", "color:#08f"].concat(message));
 };
 
-export enum Events {
+export enum Event {
   START = "[ws] START",
   WS_OPEN = "[ws] WS_OPEN",
   WS_CLOSE = "[ws] WS_CLOSE",
@@ -25,18 +24,18 @@ export enum Events {
   DISCONNECT = "[ws] DISCONNECT",
 }
 
-// type Dispatch = (event: Events, payload?: any) => void;
+type Dispatch = (event: Event, payload?: any) => void;
 
 export class SignalClient {
-  public error: string = null;
-  public twillio: Promise<any>;
-  public auth: Promise<string>;
+  public error: string | null = null;
+  public twillio = new Defer();
+  public auth = new Defer<string>();
 
   private ws: WebSocket;
   private dataListeners = new Set<CallbackMap["data"]>();
 
   constructor(public readonly uuid: string, private dispatch?: Dispatch) {
-    this.notify(Events.START);
+    this.notify(Event.START);
 
     this.ws = new WebSocket(BACKEND);
 
@@ -49,28 +48,19 @@ export class SignalClient {
     };
     ping();
 
-    let twRes;
-    this.twillio = new Promise((res) => (twRes = res));
-
-    let authRes, authRej;
-    this.auth = new Promise((res, rej) => {
-      authRes = res;
-      authRej = rej;
-    });
-
     const token = sessionStorage.getItem(TOKEN_KEY_PREFIX + uuid);
     const twillio = sessionStorage.getItem(TWILLIO_KEY);
 
     if (twillio) {
       try {
-        twRes(JSON.parse(twillio));
+        this.twillio.resolve(JSON.parse(twillio));
 
-        this.notify(Events.TWILLIO_OK);
+        this.notify(Event.TWILLIO_OK);
       } catch (e) {}
     }
 
     const open = () => {
-      this.notify(Events.WS_OPEN);
+      this.notify(Event.WS_OPEN);
 
       this.ws.send(
         JSON.stringify({
@@ -91,7 +81,7 @@ export class SignalClient {
     };
 
     const message = (m: MessageEvent) => {
-      this.notify(Events.WS_MESSAGE, m.data);
+      this.notify(Event.WS_MESSAGE, m.data);
       try {
         const data = JSON.parse(m.data);
 
@@ -100,23 +90,25 @@ export class SignalClient {
             log("Token updated");
             sessionStorage.setItem(TOKEN_KEY_PREFIX + uuid, data.token);
 
-            this.notify(Events.AUTH_OK, uuid);
-            authRes(uuid);
+            this.notify(Event.AUTH_OK, uuid);
+
+            this.auth.resolve(uuid);
           }
 
           if (data.error) {
             this.error = data.error;
 
-            this.notify(Events.AUTH_FAIL, data.error);
+            this.notify(Event.AUTH_FAIL, data.error);
 
-            authRej(new Error(data.error));
+            this.auth.reject(new Error(data.error));
           }
         }
 
         if (data.type === "twillio" && data.token) {
           sessionStorage.setItem(TWILLIO_KEY, JSON.stringify(data.token));
 
-          twRes(data.token);
+          // twRes(data.token);
+          this.twillio.resolve(data.token);
         }
 
         if (data.type === "send" && data.to === this.uuid) {
@@ -130,7 +122,7 @@ export class SignalClient {
     };
 
     const close = () => {
-      this.notify(Events.WS_CLOSE);
+      this.notify(Event.WS_CLOSE);
       log("CLOSE");
     };
 
@@ -163,13 +155,13 @@ export class SignalClient {
 
   disconnect() {
     log("disconnect");
-    this.notify(Events.DISCONNECT);
+    this.notify(Event.DISCONNECT);
     this.ws.close();
   }
 
   /** Try and send to the underlying connection */
   private _send(message: any, retries = 3) {
-    this.notify(Events.WS_SEND, message);
+    this.notify(Event.WS_SEND, message);
 
     if (this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
@@ -181,14 +173,23 @@ export class SignalClient {
     }
   }
 
-  private notify(type: Events, payload?: any) {
+  private notify(type: Event, payload?: any) {
     if (this.dispatch) {
-      this.dispatch({
-        type,
-        payload,
-      });
+      this.dispatch(type, payload);
     } else {
       log(type, payload);
     }
+  }
+}
+
+class Defer<T> extends Promise<T> {
+  resolve: (value: T | PromiseLike<T>) => void = () => {};
+  reject: (err: any) => void = () => {};
+
+  constructor() {
+    super((res, rej) => {
+      this.resolve = res;
+      this.reject = rej;
+    });
   }
 }

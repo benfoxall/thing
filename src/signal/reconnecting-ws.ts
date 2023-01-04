@@ -334,6 +334,7 @@ export default class ReconnectingWebSocket {
     if (this._listeners[type]) {
       // @ts-ignore
       this._listeners[type] = this._listeners[type].filter(
+        // @ts-ignore
         (l) => l !== listener
       );
     }
@@ -381,6 +382,7 @@ export default class ReconnectingWebSocket {
       if (typeof url === "string") {
         return Promise.resolve(url);
       }
+      // @ts-ignore
       if (url.then) {
         return url;
       }

@@ -28,8 +28,8 @@ type Dispatch = (event: Event, payload?: any) => void;
 
 export class SignalClient {
   public error: string | null = null;
-  public twillio = new Defer();
-  public auth = new Defer<string>();
+  public twillio = defer();
+  public auth = defer<string>();
 
   private ws: WebSocket;
   private dataListeners = new Set<CallbackMap["data"]>();
@@ -140,7 +140,7 @@ export class SignalClient {
 
   send(target: string, message: any) {
     // need to be authed before we can send messages to others
-    this.auth.then(() => {
+    this.auth.promise.then(() => {
       this._send(
         {
           type: "send",
@@ -171,6 +171,8 @@ export class SignalClient {
 
       setTimeout(this._send.bind(this), 1500, message, retries - 1);
     }
+
+    return false;
   }
 
   private notify(type: Event, payload?: any) {
@@ -182,14 +184,18 @@ export class SignalClient {
   }
 }
 
-class Defer<T> extends Promise<T> {
-  resolve: (value: T | PromiseLike<T>) => void = () => {};
-  reject: (err: any) => void = () => {};
+function defer<T>() {
+  let resolve: (value: T | PromiseLike<T>) => void = () => {};
+  let reject: (err: any) => void = () => {};
 
-  constructor() {
-    super((res, rej) => {
-      this.resolve = res;
-      this.reject = rej;
-    });
-  }
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+
+  return {
+    promise,
+    resolve,
+    reject,
+  };
 }

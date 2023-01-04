@@ -1,3 +1,5 @@
+import { SignalClient } from "./signal/signal";
+
 export class Session {
   constructor(readonly id = getId()) {}
 }
@@ -15,3 +17,7 @@ function getId() {
 
   return generated;
 }
+
+// @ts-ignore
+window.SignalClient = SignalClient;
+// const s = new SignalClient('thing-thing')

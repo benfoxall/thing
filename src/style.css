@@ -19,6 +19,9 @@ html, body {
 body.active {
   background-color: #000;
 }
+body.active .qr {
+  opacity:0.05;
+}
 
 p {margin: 0}
 
@@ -31,7 +34,8 @@ p {margin: 0}
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  transition: all 1s;
+  opacity:1;
+  transition: opacity .2s;
 }
 
 .drop {

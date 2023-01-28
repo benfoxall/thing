@@ -20,11 +20,11 @@ if (target) {
   const channel = alby.channels.get(target);
 
   // channel.
-  channel.publish("point", [0.5, 0.5]);
+  channel.publish("point", [1, 1]);
 
   if (import.meta.env.DEV) {
     setTimeout(() => {
-      channel.publish("point", [0.5, 0.5]);
+      channel.publish("point", [1, 1]);
     }, 500);
   }
 
@@ -33,6 +33,14 @@ if (target) {
     const y = e.clientY / window.innerHeight;
     console.log([x, y]);
     channel.publish("point", [x, y]);
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      channel.publish("point", [0, 0]);
+    } else {
+      channel.publish("point", [1, 1]);
+    }
   });
 } else {
   // become client
@@ -53,32 +61,35 @@ if (target) {
 
   // hacky mess
 
-  const qrEl = app.querySelector("img")!;
-
   let timer = -1;
 
   channel.subscribe("point", (message) => {
     console.log("point!", message);
     const [x, y] = message.data;
 
-    // animate a drop
-    const drop = document.createElement("div");
-    drop.className = "drop";
-    document.body.appendChild(drop);
-    drop.style.left = `${x * 100}%`;
-    drop.style.top = `${y * 100}%`;
-
-    setTimeout(() => {
-      drop.remove();
-    }, 3000);
-
-    // make the QR code disapear
-    qrEl.style.opacity = "0.05";
-    document.body.classList.toggle("active", true);
-    clearTimeout(timer);
-    timer = window.setTimeout(() => {
-      qrEl.style.opacity = "1";
+    if (x === 1 && x == 1) {
+      document.body.classList.toggle("active", true);
+    } else if (x === 0 && x == 0) {
       document.body.classList.toggle("active", false);
-    }, 10000);
+    } else {
+      // animate a drop
+      const drop = document.createElement("div");
+      drop.className = "drop";
+      document.body.appendChild(drop);
+      drop.style.left = `${x * 100}%`;
+      drop.style.top = `${y * 100}%`;
+
+      setTimeout(() => {
+        drop.remove();
+      }, 3000);
+
+      // make the QR code disapear
+
+      document.body.classList.toggle("active", true);
+      clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        document.body.classList.toggle("active", false);
+      }, 10000);
+    }
   });
 }

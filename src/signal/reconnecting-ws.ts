@@ -58,6 +58,8 @@ const getGlobalWebSocket = (): WebSocket | undefined => {
     // @ts-ignore
     return WebSocket;
   }
+
+  return;
 };
 
 /**

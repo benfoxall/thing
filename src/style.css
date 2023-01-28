@@ -19,4 +19,30 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+  transition: all 1s;
+}
+
+.drop {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  
+  background: #f08;
+  animation: 1s  pulse;
+  animation-fill-mode: forwards;
+
+}
+
+@keyframes pulse {
+  from {
+    transform: translate(-50%, -50%) scale(0.1);
+  }
+
+  to {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
 }

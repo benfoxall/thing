@@ -13,7 +13,9 @@ const app = document.querySelector<HTMLDivElement>("#app")!;
 
 if (target) {
   // become host
-  app.innerText = `<< ${target} >>`;
+  if (import.meta.env.DEV) app.innerText = `<< ${target} >>`;
+
+  document.body.classList.toggle("active", true);
 
   const channel = alby.channels.get(target);
 
@@ -40,11 +42,10 @@ if (target) {
 
   app.innerHTML = `
     <div>
-      <p>${id}</p>
+      ${import.meta.env.DEV ? `<p>${id}</p>` : ""}
       <a href="${base}" target="_blank">
         <img class="qr" src=${qr.toDataURL()} alt="QR Code for ${base}"/>
       </a>
-      <div class="drop" />
     </div>
   `;
 
@@ -73,9 +74,11 @@ if (target) {
 
     // make the QR code disapear
     qrEl.style.opacity = "0.05";
+    document.body.classList.toggle("active", true);
     clearTimeout(timer);
     timer = window.setTimeout(() => {
       qrEl.style.opacity = "1";
+      document.body.classList.toggle("active", false);
     }, 10000);
   });
 }

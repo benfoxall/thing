@@ -7,8 +7,20 @@
   /* color-scheme: light dark; */
   /* color: rgba(255, 255, 255, 0.87); */
   background-color: #fff;
+  transition: all .5s;
 }
 
+
+html, body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+}
+body.active {
+  background-color: #000;
+}
+
+p {margin: 0}
 
 .qr {
   image-rendering: pixelated;

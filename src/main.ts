@@ -69,6 +69,10 @@ if (target) {
 
     if (x === 1 && x == 1) {
       document.body.classList.toggle("active", true);
+      clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        document.body.classList.toggle("active", false);
+      }, 10000);
     } else if (x === 0 && x == 0) {
       document.body.classList.toggle("active", false);
     } else {

@@ -6,8 +6,10 @@ const session = new Session();
 
 const { origin, pathname } = window.location;
 const base = `${origin}${pathname}?${new URLSearchParams({
-  claim: session.id,
+  to: session.id,
 })}`;
+
+console.log(import.meta.env.VITE_ABLY_KEY);
 
 var qr = new QRious({
   value: base,
